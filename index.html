@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Translator - Cyberpunk Style</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(30, 41, 59, 0.5); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #34d399; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #10b981; }
+        
+        /* Animasi kedip untuk cursor */
+        .cursor-blink { animation: blink 1s step-end infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-900 text-slate-200 font-sans selection:bg-emerald-500/30 flex flex-col items-center justify-start p-4 pt-10 pb-10 relative overflow-x-hidden">
+
+    <!-- Background Decor -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div class="absolute top-[-10%] right-[-5%] w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-[-10%] left-[-5%] w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="w-full max-w-3xl z-10 space-y-8">
+        
+        <!-- Header -->
+        <div class="text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-800 border border-slate-700 shadow-xl mb-4 shadow-emerald-500/10">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent mb-2">
+                Binary Translator
+            </h1>
+            <p class="text-slate-400">Terjemahkan bahasa manusia ke bahasa mesin.</p>
+        </div>
+
+        <!-- Main Converter Card -->
+        <div class="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-3xl shadow-2xl overflow-hidden">
+            <!-- Mode Switcher -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700/50 bg-slate-800/50">
+                <div class="flex items-center gap-3">
+                    <span id="label-left" class="text-sm font-semibold tracking-wider text-emerald-400">TEXT</span>
+                    <button id="btn-toggle" class="p-2 rounded-full bg-slate-700 hover:bg-slate-600 transition-colors group">
+                        <svg id="icon-arrow" class="w-4 h-4 text-slate-300 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg>
+                    </button>
+                    <span id="label-right" class="text-sm font-semibold tracking-wider text-slate-500">BINARY</span>
+                </div>
+                <button id="btn-reset" class="text-xs flex items-center gap-1 text-slate-400 hover:text-red-400 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                    Reset
+                </button>
+            </div>
+
+            <div class="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-700/50">
+                <!-- Input -->
+                <div class="p-6 flex flex-col h-72">
+                    <label class="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
+                        <span id="input-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></span>
+                        <span id="input-label">Input (Teks)</span>
+                    </label>
+                    <textarea id="input-text" placeholder="Ketik sesuatu..." class="flex-1 w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all resize-none font-sans" spellcheck="false"></textarea>
+                </div>
+
+                <!-- Output -->
+                <div class="p-6 flex flex-col h-72 bg-slate-900/30 relative">
+                    <label class="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
+                        <span id="output-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="14" y="14" width="4" height="6" rx="2"/><rect x="6" y="4" width="4" height="6" rx="2"/><path d="M6 20h4"/><path d="M14 10h4"/><path d="M6 14h2v6"/><path d="M14 4h2v6"/></svg></span>
+                        <span id="output-label">Output (Biner)</span>
+                    </label>
+                    <div id="output-container" class="flex-1 w-full bg-slate-800/30 border border-slate-700/30 rounded-xl p-4 overflow-y-auto custom-scrollbar">
+                        <p id="output-text" class="break-words font-mono text-emerald-400 tracking-wider hidden"></p>
+                        <div id="empty-state" class="h-full flex items-center justify-center text-slate-600 italic text-sm">Hasil muncul di sini...<span class="cursor-blink">|</span></div>
+                    </div>
+                    <button id="btn-copy" class="hidden absolute bottom-8 right-8 flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold rounded-lg shadow-lg shadow-emerald-500/20 transition-all transform hover:scale-105 active:scale-95">
+                        <span id="icon-copy-wrapper"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+                        <span id="btn-copy-text">Salin</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- EDUCATIONAL SECTION (NEW) -->
+        <div class="bg-slate-800/30 border border-slate-700/50 rounded-3xl p-6 md:p-8 backdrop-blur-sm">
+            <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+                Apa itu Binary Code?
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Penjelasan 1 -->
+                <div class="space-y-4">
+                    <div class="flex items-start gap-4">
+                        <div class="p-3 bg-emerald-500/10 rounded-xl text-emerald-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10V2c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v8"/><path d="M6 14v6c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2v-6"/><path d="M6 10h12"/><line x1="12" y1="10" x2="12" y2="14"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-emerald-400 mb-1">Cuma "Nyala" & "Mati"</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed">
+                                Bayangkan <strong>Saklar Lampu</strong>. Saklar cuma punya dua kondisi: Nyala (ON) atau Mati (OFF). Komputer itu isinya miliaran saklar kecil.
+                                <br><br>
+                                <span class="text-emerald-300 font-mono bg-emerald-900/30 px-1 rounded">1</span> = Lampu Nyala (Ada listrik)<br>
+                                <span class="text-slate-400 font-mono bg-slate-700/30 px-1 rounded">0</span> = Lampu Mati (Tidak ada listrik)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Penjelasan 2 -->
+                <div class="space-y-4">
+                    <div class="flex items-start gap-4">
+                        <div class="p-3 bg-purple-500/10 rounded-xl text-purple-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 17h6"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-purple-400 mb-1">Bagaimana Jadi Huruf?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed">
+                                Supaya bisa nulis "A", "B", atau "C", para ilmuwan sepakat membuat kamus (standar ASCII). Setiap huruf diwakili oleh 8 saklar (8-bit).
+                                <br><br>
+                                Contoh huruf <strong>'A'</strong>:<br>
+                                <span class="font-mono text-xs bg-slate-900 p-1 rounded border border-slate-700 mt-1 inline-block">
+                                    <span class="text-slate-500">0</span><span class="text-emerald-400">1</span><span class="text-slate-500">00000</span><span class="text-emerald-400">1</span>
+                                </span>
+                                <span class="text-xs italic text-slate-500 ml-2">(Mati-Nyala-Mati...Nyala)</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fun Fact -->
+            <div class="mt-6 p-4 bg-slate-900/50 rounded-xl border border-dashed border-slate-700/50 text-center">
+                <p class="text-sm text-slate-400">
+                    <span class="text-emerald-400 font-bold">Tahukah kamu?</span> Video, foto, game, bahkan website ini, pada dasarnya hanyalah miliaran angka 0 dan 1 yang diproses super cepat oleh prosesor! 🚀
+                </p>
+            </div>
+
+            <!-- External Resources (NEW) -->
+            <div class="mt-8 pt-6 border-t border-slate-700/50">
+                <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    Mau Belajar Lebih Dalam?
+                </h3>
+                <p class="text-slate-400 text-sm mb-4">
+                    Penjelasan di atas cuma dasar banget. Kalau kamu penasaran gimana cara kerjanya secara teknis dan lengkap, cek sumber rekomendasi ini:
+                </p>
+                <div class="flex flex-wrap gap-3">
+                    <a href="https://id.wikipedia.org/wiki/Sistem_bilangan_biner" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg transition-colors text-sm font-medium border border-slate-600 hover:border-emerald-500/50 group">
+                        <span>📚 Wikipedia (Teori Lengkap)</span>
+                        <svg class="text-slate-400 group-hover:text-emerald-400 transition-colors" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    </a>
+                    <a href="https://www.khanacademy.org/computing/computer-science" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg transition-colors text-sm font-medium border border-slate-600 hover:border-emerald-500/50 group">
+                        <span>🎓 Khan Academy (Kursus Gratis)</span>
+                        <svg class="text-slate-400 group-hover:text-emerald-400 transition-colors" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Contact -->
+        <div class="flex flex-col items-center gap-2 pb-8">
+             <div class="flex items-center gap-2 px-5 py-2 rounded-full bg-slate-800 border border-slate-700 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/10 transition-all group cursor-pointer">
+                <span class="text-xs uppercase tracking-widest font-bold text-slate-500 group-hover:text-emerald-500 transition-colors">Support</span>
+                <span class="w-1 h-1 rounded-full bg-slate-600 group-hover:bg-emerald-500 transition-colors"></span>
+                <div class="flex items-center gap-2 text-slate-300 group-hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                    <a href="mailto:vintrzystore@gmail.com" class="font-medium text-sm">vintrzystore@gmail.com</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Logic Javascript -->
+    <script>
+        const inputText = document.getElementById('input-text');
+        const outputText = document.getElementById('output-text');
+        const emptyState = document.getElementById('empty-state');
+        const btnCopy = document.getElementById('btn-copy');
+        const btnToggle = document.getElementById('btn-toggle');
+        const btnReset = document.getElementById('btn-reset');
+        
+        // Label & Icons
+        const labelLeft = document.getElementById('label-left');
+        const labelRight = document.getElementById('label-right');
+        const inputLabel = document.getElementById('input-label');
+        const outputLabel = document.getElementById('output-label');
+        const inputIcon = document.getElementById('input-icon');
+        const outputIcon = document.getElementById('output-icon');
+        const iconArrow = document.getElementById('icon-arrow');
+
+        let isTextToBinary = true;
+
+        // SVG Icons String
+        const iconType = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>`;
+        const iconBinary = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="14" y="14" width="4" height="6" rx="2"/><rect x="6" y="4" width="4" height="6" rx="2"/><path d="M6 20h4"/><path d="M14 10h4"/><path d="M6 14h2v6"/><path d="M14 4h2v6"/></svg>`;
+        const iconCopy = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
+        const iconCheck = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+        // Fungsi Konversi
+        function convertToBinary(text) {
+            return text.split('').map(char => char.charCodeAt(0).toString(2).padStart(8, '0')).join(' ');
+        }
+
+        function convertToText(binary) {
+            const cleanBinary = binary.replace(/[^01\s]/g, '');
+            return cleanBinary.split(/\s+/).filter(bin => bin !== '').map(bin => String.fromCharCode(parseInt(bin, 2))).join('');
+        }
+
+        function updateOutput() {
+            const val = inputText.value;
+            let result = '';
+
+            if (val.trim() === '') {
+                outputText.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                btnCopy.classList.add('hidden');
+                return;
+            }
+
+            if (isTextToBinary) {
+                result = convertToBinary(val);
+                outputText.className = "break-words font-mono text-emerald-400 tracking-wider";
+            } else {
+                result = convertToText(val);
+                outputText.className = "break-words font-sans text-slate-200";
+            }
+
+            outputText.textContent = result;
+            outputText.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            btnCopy.classList.remove('hidden');
+        }
+
+        // Event Listeners
+        inputText.addEventListener('input', updateOutput);
+
+        btnToggle.addEventListener('click', () => {
+            isTextToBinary = !isTextToBinary;
+            inputText.value = '';
+            updateOutput();
+            iconArrow.classList.toggle('rotate-180');
+
+            if (isTextToBinary) {
+                labelLeft.className = "text-sm font-semibold tracking-wider text-emerald-400";
+                labelRight.className = "text-sm font-semibold tracking-wider text-slate-500";
+                inputLabel.textContent = "Input (Teks)";
+                outputLabel.textContent = "Output (Biner)";
+                inputIcon.innerHTML = iconType;
+                outputIcon.innerHTML = iconBinary;
+                inputText.placeholder = "Ketik sesuatu...";
+                inputText.className = "flex-1 w-full bg-slate-900/50 border border-slate-700 rounded-xl p-4 text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all resize-none font-sans";
+            } else {
+                labelLeft.className = "text-sm font-semibold tracking-wider text-slate-500";
+                labelRight.className = "text-sm font-semibold tracking-wider text-emerald-400";
+                inputLabel.textContent = "Input (Biner)";
+          
